@@ -27,28 +27,31 @@ export function isValidHttpUrl(string) {
 export const fetchUrlMetadata = async (url) => {
     let response;
 
+    let data;
+
+    const jsonlink_api_key = process.env.NEXT_PUBLIC_JSONLINK_API_KEY
+
     try {
         response = await fetch(
-            publicRuntimeConfig.jsonlink_api_url + `/extract?url=${url}`
+            publicRuntimeConfig.jsonlink_api_url + `/extract?url=${url}&api_key=${jsonlink_api_key}`
         )
 
         if (!response.ok) {
             toast.error('Oops! Bad URL.')
             return false
         }
+
+        data = await response.json();
     } catch (error) {
         console.log(error);
-        return;
     }
-
-    const data = await response.json();
 
     const linksArray = localStorage.getItem('links') ? JSON.parse(localStorage.getItem('links')) : []
 
     const linkMetaData = {
         'id': Math.random().toString(36).substr(2, 8),
-        'title': data.title,
-        'url': data.url,
+        'title': data?.title ?? url,
+        'url': data?.url ?? url,
         'timestamp': Math.floor(Date.now() / 1000),
     }
 
